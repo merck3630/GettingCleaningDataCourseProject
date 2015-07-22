@@ -22,30 +22,39 @@ This R script completes all of the tasks above.  It depends on the library "dply
 
 These datasets are raw data read in from the data supplied at the link above.
 
-`testsubject` <- test/subject_test.txt
-`testactivity` <- test/y_test.txt
-`testdata` <- test/X_test.txt
-`trainsubject` <- train/subject_train.txt
-`trainactivity` <- train/y_train.txt
-`traindata` <- train/X_train.txt
-`features` <- features.txt
-`activitynames` <- activity_labels.txt
+* `testsubject` <- test/subject_test.txt
+* `testactivity` <- test/y_test.txt
+* `testdata` <- test/X_test.txt
+* `trainsubject` <- train/subject_train.txt
+* `trainactivity` <- train/y_train.txt
+* `traindata` <- train/X_train.txt
+* `features` <- features.txt
+* `activitynames` <- activity_labels.txt
 
-In order to process the required fields, a logical vector listing TRUE for column names with "mean" or "std" in the column name was created and stored in `meanstdcols` from `features`.  The `features` data set was cleaned of bad characters and used along with the `meanstdcols` vector to create the `testdataext` and `traindataext` data sets which only contain the data that is needed according to the second requirement above.
+In order to process the required fields, a logical vector listing TRUE for column names with "mean" or "std" in the column name was created and stored in `meanstdcols` from `features` using:
+`meanstdcols <- grepl("(std|mean[^F])", features$V2)`
 
-Next, a complete `test` and `train` data set is created combining a type designation for "test" or "train", the subject, activity, and the extracted data.  
+The `features` data set was cleaned of bad characters using:
+`features$V2 <- gsub("[^[:alnum:]///' ]", "", features$V2)`
 
-Finally, `dplyr` is used to `filter` and `mutate` the `test` and `train` data sets so that a readable activity name replaces the activity indices.  Interim data sets `testact1:testact6` and `trainact1:trainact6` are used to accomplish this task.  Then the `test` and `train` data sets are combined to create a single `tidydata` data set with dimensions 10299 by 69.  
+The updated `features$V2` and `meanstdcols` vector to create the `testdataext` and `traindataext` data sets which only contain the data that is needed according to the second requirement above.
 
-In order to adress the fifth requirement above, `tidydataave` was created using `summarise_each` from `dplyr` with dimensions 180 by 69.  This datasets is organized by subject, activity, and type.
+Next, a complete `test` and `train` data set is created combining a type designation for "test" or "train", the subject, activity, and the extracted data using:
+`test <- cbind(type="test",testsubject,testactivity,testdataext)`
+`train <- cbind(type="train",trainsubject,trainactivity,traindataext)`
 
+`dplyr` is used to `filter` and `mutate` the `test` and `train` data sets so that a readable activity name replaces the activity indices.  Interim data sets `testact1:testact6` and `trainact1:trainact6` are used to accomplish this task.  For example:
+`test <- tbl_df(test)`
+`testact1 <- filter(test,activity==1)`
+`testact1 <- mutate(testact1,activity=activitynames$V2[[1]])`
 
- These datasets are combined into a complete
+Then the `test` and `train` data sets are combined to create a single `tidydata` data set with dimensions 10299 by 69.  
 
+In order to adress the fifth requirement above, `tidydataave` was created using `summarise_each` from `dplyr` with dimensions 180 by 69.  This datasets is organized by subject, activity, and type using:
+`avedataset <- tbl_df(tidydata)`
+`avedataset <- group_by(avedataset, subject, activity, type)`
+`tidydataave<- summarise_each(avedataset,funs(mean))`
 
-# combine test data and add "type" column for "test"
-test <- cbind(type="test",testsubject,testactivity,testdataext)
-
-# combine train data and add "type" column for "train"
-train <- cbind(type="train",trainsubject,trainactivity,traindataext)
-Good luck!
+`tidydata` and `tidydataave` are written to disk:
+`write.table(tidydata, "tidyData.txt", row.name=FALSE)`
+`write.table(tidydataave, "tidyData2.txt", row.name=FALSE)`
