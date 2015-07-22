@@ -18,7 +18,7 @@ You should create one R script called run_analysis.R that does the following.
 
 This R script completes all of the tasks above.  It depends on the library "dplyr" which is available using the normal `install.packages("dplyr")` command.
 
-# Datasets within the code
+# What the code does
 
 These datasets are raw data read in from the data supplied at the link above.
 
