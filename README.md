@@ -32,29 +32,41 @@ These datasets are raw data read in from the data supplied at the link above.
 * `activitynames` <- activity_labels.txt
 
 In order to process the required fields, a logical vector listing TRUE for column names with "mean" or "std" in the column name was created and stored in `meanstdcols` from `features` using:
+
 `meanstdcols <- grepl("(std|mean[^F])", features$V2)`
 
 The `features` data set was cleaned of bad characters using:
+
 `features$V2 <- gsub("[^[:alnum:]///' ]", "", features$V2)`
 
 The updated `features$V2` and `meanstdcols` vector to create the `testdataext` and `traindataext` data sets which only contain the data that is needed according to the second requirement above.
 
 Next, a complete `test` and `train` data set is created combining a type designation for "test" or "train", the subject, activity, and the extracted data using:
+
 `test <- cbind(type="test",testsubject,testactivity,testdataext)`
+
 `train <- cbind(type="train",trainsubject,trainactivity,traindataext)`
 
 `dplyr` is used to `filter` and `mutate` the `test` and `train` data sets so that a readable activity name replaces the activity indices.  Interim data sets `testact1:testact6` and `trainact1:trainact6` are used to accomplish this task.  For example:
+
 `test <- tbl_df(test)`
+
 `testact1 <- filter(test,activity==1)`
+
 `testact1 <- mutate(testact1,activity=activitynames$V2[[1]])`
 
 Then the `test` and `train` data sets are combined to create a single `tidydata` data set with dimensions 10299 by 69.  
 
 In order to adress the fifth requirement above, `tidydataave` was created using `summarise_each` from `dplyr` with dimensions 180 by 69.  This datasets is organized by subject, activity, and type using:
+
 `avedataset <- tbl_df(tidydata)`
+
 `avedataset <- group_by(avedataset, subject, activity, type)`
+
 `tidydataave<- summarise_each(avedataset,funs(mean))`
 
 `tidydata` and `tidydataave` are written to disk:
+
 `write.table(tidydata, "tidyData.txt", row.name=FALSE)`
+
 `write.table(tidydataave, "tidyData2.txt", row.name=FALSE)`
