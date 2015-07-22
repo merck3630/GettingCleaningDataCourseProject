@@ -41,7 +41,7 @@ The `features` data set was cleaned of bad characters using:
 
 The updated `features$V2` and `meanstdcols` vector to create the `testdataext` and `traindataext` data sets which only contain the data that is needed according to the second requirement above.
 
-Next, a complete `test` and `train` data set is created combining a type designation for "test" or "train", the subject, activity, and the extracted data using:
+Next, a complete `test` and `train` data set is created combining a **type designation for "test" or "train"**, the subject, activity, and the extracted data using:
 
 * `test <- cbind(type="test",testsubject,testactivity,testdataext)`
 * `train <- cbind(type="train",trainsubject,trainactivity,traindataext)`
